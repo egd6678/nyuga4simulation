@@ -296,3 +296,4 @@ with tab5:
             f"💡 **GA4 Diagnostic Analysis for {brand}:**\n"
             f"* **Paid Search Conversion Rate (3.4%)** outperforms Organic Social (2.1%) because paid search targets buyers in the **Decision Stage** who are actively searching for solutions.\n"
             f"* **Attribution Insight:** Paid Search generated **{conversions} direct conversions** while driving secondary brand awareness. UTM campaign tag (`{utm_campaign}`) successfully captured all attribution data in GA4."
+        )
