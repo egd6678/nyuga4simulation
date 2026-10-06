@@ -2,44 +2,28 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-st.set_page_config(page_title="GA4 & Google Ads Campaign Simulator", page_icon="📊", layout="wide")
+st.set_page_config(page_title="Paid Search Campaign Simulator", page_icon="📊", layout="wide")
 
-st.title("📊 Paid Search & GA4 Campaign Simulator")
-st.caption("NYU INTG1-GC 2105 | Class 5: Hands-On Google Ads & GA4 Campaign Builder")
+# --- MAIN TITLE ---
+st.title("Paid Search Campaign Simulator")
+st.caption("Class 5 Hands-On Exercise: Keyword Research, Match Types, Ad Building & GA4 Analytics")
 
 # --- SIDEBAR: CAMPAIGN CONFIGURATION ---
-st.sidebar.header("⚙️ 1. Campaign Settings")
-
-brand = st.sidebar.selectbox(
-    "Select Group Project Company:",
-    [
-        "Book Club Bar",
-        "Thanks! Social Club",
-        "NYC Great Movers",
-        "Cloudy",
-        "Ando Patisserie",
-        "Trainwell",
-        "Brasil Run Club",
-        "Parkii"
-    ]
-)
+st.sidebar.header("⚙️ Campaign Settings")
 
 campaign_objective = st.sidebar.selectbox(
     "Campaign Marketing Objective:",
-    ["Lead Generation (Form Fill / Booking)", "Website Traffic & Awareness", "E-Commerce Sales / RSVPs"]
+    ["Sales", "Leads", "Website Traffic", "Brand Awareness"]
 )
 
-st.sidebar.subheader("🌐 Networks & Location")
-networks = st.sidebar.multiselect(
-    "Select Ad Networks:",
-    ["Google Search Network", "Google Search Partners", "Google Display Network (Opt-Out Recommended)"],
-    default=["Google Search Network"]
+conversion_goal = st.sidebar.selectbox(
+    "Conversion Goals:",
+    ["Purchases", "Lead Form Submissions", "Phone Calls", "Page Views"]
 )
 
-location = st.sidebar.multiselect(
-    "Target Locations:",
-    ["NYC Metro (5 Boroughs)", "Tri-State Area (NY/NJ/CT)", "Nationwide (US)", "Specific Zip Codes"],
-    default=["NYC Metro (5 Boroughs)"]
+target_locations = st.sidebar.text_input(
+    "Target Locations (U.S. States or Zip Codes):",
+    value="NY, NJ, CT, 10001, 10003"
 )
 
 st.sidebar.subheader("💰 Bidding & Budget")
@@ -48,11 +32,19 @@ bidding_strategy = st.sidebar.selectbox(
     ["Maximize Clicks", "Maximize Conversions", "Target CPA", "Target ROAS"]
 )
 
-daily_budget = st.sidebar.slider("Daily Budget (\$):", min_value=10, max_value=500, value=50, step=10)
+target_roas_input = st.sidebar.number_input(
+    "Target ROAS Number (e.g., 3.5 for 3.5x / 350%):",
+    min_value=0.5,
+    max_value=20.0,
+    value=3.5,
+    step=0.5
+)
+
+daily_budget = st.sidebar.slider("Daily Budget ($):", min_value=10, max_value=500, value=50, step=10)
 monthly_budget = daily_budget * 30.4
 
 st.sidebar.subheader("🔗 GA4 Tracking & Attribution")
-utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value=f"fall2026_{brand.lower().replace(' ', '_')}_search")
+utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value="fall2026_paid_search_campaign")
 auto_tagging = st.sidebar.checkbox("Enable Google Auto-Tagging (GCLID for GA4)", value=True)
 
 # --- TAB NAVIGATION ---
@@ -66,18 +58,18 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 
 # --- MODULE 1: CUSTOM KEYWORD PLANNER ---
 with tab1:
-    st.header("Module 1: Keyword Research & Custom Keyword Planner")
-    st.write("Enter **5 custom keywords** your prospective buyers would search for. The planner will estimate Search Volume (MSV), Keyword Difficulty (KD %), and Cost Per Click (CPC).")
+    st.header("Module 1: Custom Keyword Research")
+    st.write("Type **5 target search terms** your prospective buyers search for. The simulator will estimate Search Volume (MSV), Keyword Difficulty (KD %), and Cost Per Click (CPC).")
     
     col_kws, col_metrics = st.columns([1, 1.5])
     
     with col_kws:
-        st.subheader("Type 5 Target Search Terms")
-        kw1 = st.text_input("Keyword 1:", value=f"best {brand.lower()} nyc" if "Bar" in brand or "Patisserie" in brand else f"buy {brand.lower()} online")
-        kw2 = st.text_input("Keyword 2:", value=f"how to solve {brand.lower()} problems" if "Thanks" in brand or "Cloudy" in brand else f"cheap {brand.lower()} quotes")
-        kw3 = st.text_input("Keyword 3:", value=f"top rated {brand.lower()} reviews")
-        kw4 = st.text_input("Keyword 4:", value=f"where to find {brand.lower()} near me")
-        kw5 = st.text_input("Keyword 5:", value=f"{brand.lower()} vs competitors")
+        st.subheader("Type 5 Search Terms")
+        kw1 = st.text_input("Keyword 1:", value="buy products online")
+        kw2 = st.text_input("Keyword 2:", value="best services near me")
+        kw3 = st.text_input("Keyword 3:", value="top rated customer reviews")
+        kw4 = st.text_input("Keyword 4:", value="pricing and quotes")
+        kw5 = st.text_input("Keyword 5:", value="affordable solutions in nyc")
         
         user_input_kws = [k.strip() for k in [kw1, kw2, kw3, kw4, kw5] if k.strip()]
 
@@ -86,7 +78,6 @@ with tab1:
         parsed_data = []
         for kw in kw_list:
             kw_lower = kw.lower()
-            # Determine Intent
             if any(term in kw_lower for term in ["buy", "cost", "price", "quote", "tickets", "book"]):
                 intent = "Decision / Commercial"
                 cpc = np.random.uniform(3.20, 5.50)
@@ -113,7 +104,7 @@ with tab1:
                 "Estimated Intent Stage": intent,
                 "Monthly Search Vol (MSV)": msv,
                 "Keyword Difficulty (KD %)": f"{kd}%",
-                "Est. CPC (\$)": round(cpc, 2)
+                "Est. CPC ($)": round(cpc, 2)
             })
         return pd.DataFrame(parsed_data)
 
@@ -123,12 +114,12 @@ with tab1:
         st.subheader("💡 Keyword Planner Research Results")
         st.dataframe(df_custom_kws, use_container_width=True, hide_index=True)
         
-        avg_cpc = df_custom_kws["Est. CPC (\$)"].mean()
+        avg_cpc = df_custom_kws["Est. CPC ($)"].mean()
         total_msv = df_custom_kws["Monthly Search Vol (MSV)"].sum()
         
         m1, m2, m3 = st.columns(3)
-        m1.metric("Total Targeted Search Vol", f"{total_msv:,}")
-        m2.metric("Blended Est. CPC", f"\${avg_cpc:.2f}")
+        m1.metric("Total Search Volume", f"{total_msv:,}")
+        m2.metric("Blended Est. CPC", f"${avg_cpc:.2f}")
         m3.metric("Keywords Analyzed", f"{len(user_input_kws)} / 5")
 
 # --- MODULE 2: MATCH TYPES & NEGATIVES ---
@@ -140,18 +131,18 @@ with tab2:
         match_type = st.radio(
             "Select Match Type Rule:",
             ["Broad Match (keyword)", 'Phrase Match ("keyword")', "Exact Match ([keyword])"],
-            help="Broad match gets maximum views; Phrase match targets order; Exact match targets precise intent."
+            help="Broad match gets maximum views; Phrase match targets phrase order; Exact match targets precise intent."
         )
     with c_neg:
-        negatives = st.text_input("Negative Keywords (comma separated):", value="free, jobs, cheap, pdf, diy, reddit, wholesale")
+        negatives = st.text_input("Negative Keywords (comma separated):", value="free, jobs, cheap, pdf, diy, reddit")
         st.caption("Negative keywords prevent wasted ad spend on unqualified clicks.")
 
     st.subheader("⚡ Real-Time Search Query Simulator")
     test_queries = [
-        f"free {brand.lower()} pdf guide",
-        f"{user_input_kws if user_input_kws else brand.lower()}",
-        f"jobs at {brand.lower()} nyc",
-        f"reviews for {brand.lower()} pricing"
+        "free pdf guide download",
+        user_input_kws[0] if user_input_kws else "target search term",
+        "jobs and career opportunities",
+        "reviews and competitor pricing"
     ]
     
     neg_list = [n.strip().lower() for n in negatives.split(",") if n.strip()]
@@ -174,16 +165,16 @@ with tab2:
 
 # --- MODULE 3: BUDGET PROJECTIONS ---
 with tab3:
-    st.header("Module 3: Campaign Projections & Formulas")
+    st.header("Module 3: Campaign Projections & Budget Setup")
     
-    ctr_benchmark = 0.065 # 6.5% CTR
+    ctr_benchmark = 0.065 # 6.5% CTR benchmark
     est_clicks = monthly_budget / avg_cpc if avg_cpc > 0 else 0
     est_impressions = est_clicks / ctr_benchmark if ctr_benchmark > 0 else 0
     
     st.write("Calculated using Class 5 Formulas: \\(\\text{CTR} = \\frac{\\text{Clicks}}{\\text{Impressions}}\\) | \\(\\text{Spend} = \\text{Clicks} \\times \\text{CPC}\\)")
     
     p1, p2, p3, p4 = st.columns(4)
-    p1.metric("Monthly Ad Budget", f"\${monthly_budget:,.2f}")
+    p1.metric("Monthly Budget", f"${monthly_budget:,.2f}")
     p2.metric("Projected Impressions", f"{int(est_impressions):,}")
     p3.metric("Projected Clicks (Sessions)", f"{int(est_clicks):,}")
     p4.metric("Benchmark CTR %", f"{ctr_benchmark*100:.1f}%")
@@ -191,43 +182,39 @@ with tab3:
 # --- MODULE 4: AD BUILDER & AD ASSETS ---
 with tab4:
     st.header("Module 4: Responsive Search Ad & Ad Assets Builder")
-    st.write("Build your ad copy and include **Ad Assets** (Step 6) to increase Quality Score and CTR.")
+    st.write("Build your ad copy and include **Ad Assets** to increase Quality Score and CTR.")
     
     col_copy, col_assets, col_preview = st.columns([1.2, 1.2, 1.5])
     
     with col_copy:
         st.subheader("1. Main Ad Copy")
-        h1 = st.text_input("Headline 1 (Max 30 chars):", value=f"Official {brand}")
-        h2 = st.text_input("Headline 2 (Max 30 chars):", value="Top Rated Experience in NYC")
+        h1 = st.text_input("Headline 1 (Max 30 chars):", value="Official Brand Website")
+        h2 = st.text_input("Headline 2 (Max 30 chars):", value="Top Rated Services in NYC")
         h3 = st.text_input("Headline 3 (Max 30 chars):", value="Book & Reserve Online Today")
         
-        d1 = st.text_area("Description 1 (Max 90 chars):", value=f"Discover why New Yorkers choose {brand}. Educational, authentic, and top-rated service.")
-        d2 = st.text_area("Description 2 (Max 90 chars):", value="Explore pricing, upcoming events, and customer reviews. Visit our official site now!")
-        display_url = st.text_input("Display URL:", value=f"www.{brand.lower().replace(' ', '')}.com/nyc")
+        d1 = st.text_area("Description 1 (Max 90 chars):", value="Discover why customers choose our services. Authentic, reliable, and top-rated experience.")
+        d2 = st.text_area("Description 2 (Max 90 chars):", value="Explore pricing, upcoming availability, and customer reviews. Visit our site now!")
+        display_url = st.text_input("Display URL:", value="www.yourcompany.com/nyc")
 
     with col_assets:
-        st.subheader("2. Ad Assets (Extensions)")
+        st.subheader("2. Ad Assets & Image Upload")
+        uploaded_image = st.file_uploader("Upload Ad Image Asset (PNG / JPG):", type=["png", "jpg", "jpeg"])
+        if uploaded_image is not None:
+            st.image(uploaded_image, caption="Uploaded Ad Image Asset Preview", width=180)
+            
         inc_sitelinks = st.checkbox("Include Sitelink Assets", value=True)
-        sitelink_text = st.text_input("Sitelink 1 Text:", value="View Pricing & Packages") if inc_sitelinks else ""
+        sitelink_text = st.text_input("Sitelink Text:", value="View Pricing & Packages") if inc_sitelinks else ""
         
         inc_callout = st.checkbox("Include Callout Assets", value=True)
-        callout_text = st.text_input("Callout Highlights:", value="24/7 Support • No Hidden Fees • Top Rated") if inc_callout else ""
+        callout_text = st.text_input("Callout Highlights:", value="24/7 Support • No Hidden Fees") if inc_callout else ""
         
         inc_call = st.checkbox("Include Phone Call Asset", value=True)
         phone_num = st.text_input("Phone Number:", value="(212) 555-0199") if inc_call else ""
-        
-        inc_location = st.checkbox("Include Location Asset (Google Maps)", value=True)
-        inc_rating = st.checkbox("Include Star Rating / Reviews Asset", value=True)
-        inc_image = st.checkbox("Include Visual Image Asset", value=True)
-        image_url = st.text_input("Image Asset URL:", value="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=200") if inc_image else ""
 
     with col_preview:
-        st.subheader("3. Live Google SERP Ad Preview")
+        st.subheader("3. Live Search Preview")
         
-        # Render SERP Box
-        rating_html = "⭐ 4.9 (128 reviews) • Business Rating" if inc_rating else ""
         phone_html = f"📞 Call {phone_num}" if inc_call else ""
-        location_html = "📍 197 E 3rd St, East Village, NYC" if inc_location else ""
         sitelink_html = f"<u>{sitelink_text}</u> • <u>Contact Us</u> • <u>FAQs</u>" if inc_sitelinks else ""
         
         st.markdown(
@@ -238,62 +225,77 @@ with tab4:
                 </div>
                 <h3 style="color: #1a0dab; margin: 4px 0px; font-size: 18px; line-height: 1.3;">{h1} | {h2} | {h3}</h3>
                 <div style="color: #4d5156; font-size: 13px; margin-bottom: 6px;">{d1} {d2}</div>
-                {"<div style='color: #f4b400; font-size: 12px; margin-bottom: 4px;'>" + rating_html + "</div>" if inc_rating else ""}
                 {"<div style='color: #006621; font-size: 12px; margin-bottom: 4px;'>" + callout_text + "</div>" if inc_callout else ""}
                 {"<div style='color: #1a0dab; font-size: 12px; margin-bottom: 4px;'>" + sitelink_html + "</div>" if inc_sitelinks else ""}
-                {"<div style='color: #5f6368; font-size: 12px;'>" + location_html + " " + phone_html + "</div>" if (inc_location or inc_call) else ""}
+                {"<div style='color: #5f6368; font-size: 12px;'>" + phone_html + "</div>" if inc_call else ""}
             </div>
             """,
             unsafe_allow_html=True
         )
-        
-        # Ad Quality & Policy Check
-        st.subheader("🛡️ Policy & Quality Check")
-        asset_count = sum([inc_sitelinks, inc_callout, inc_call, inc_location, inc_rating, inc_image])
-        if asset_count >= 3:
-            st.success(f"✅ Quality Score Boost: {asset_count} Ad Assets Included (Google recommends 3+)")
-        else:
-            st.warning(f"⚠️ Only {asset_count} Ad Assets selected. Add more assets to improve Quality Score.")
 
 # --- MODULE 5: GA4 ANALYTICS DASHBOARD ---
 with tab5:
     st.header("Module 5: Simulated GA4 Performance & Channel Attribution")
     
-    if st.button("🚀 Launch Campaign & Run GA4 Analytics Simulation"):
-        conv_rate = 0.034 # 3.4% conversion rate
+    if st.button("Launch Campaign Simulation"):
+        conv_rate = 0.032 # 3.2% conversion rate
         conversions = int(est_clicks * conv_rate)
         cpa = monthly_budget / conversions if conversions > 0 else 0
-        roas = (conversions * 95.00) / monthly_budget if monthly_budget > 0 else 0
         
-        st.subheader("📈 GA4 Campaign Overview (Paid Search Channel)")
+        # Calculate Simulated Actual ROAS based on $85 order value
+        total_revenue = conversions * 85.00
+        actual_roas = total_revenue / monthly_budget if monthly_budget > 0 else 0
+        
+        st.subheader("📈 GA4 Overview Metrics (Paid Search)")
         g1, m2, g3, g4, g5 = st.columns(5)
         g1.metric("GA4 Sessions (Clicks)", f"{int(est_clicks):,}")
-        m2.metric("Total Spend", f"\${monthly_budget:,.2f}")
+        m2.metric("Total Monthly Spend", f"${monthly_budget:,.2f}")
         g3.metric("Conversions", f"{conversions}")
-        g4.metric("Cost Per Acquisition (CPA)", f"\${cpa:.2f}")
-        g5.metric("Target ROAS", f"{roas:.2f}x")
+        g4.metric("Cost Per Acquisition (CPA)", f"${cpa:.2f}")
+        g5.metric("Simulated ROAS", f"{actual_roas:.2f}x", delta=f"{actual_roas - target_roas_input:.2f}x vs Target")
         
-        # Simulated 30-Day Trend
+        # --- ROAS ANALYSIS & DIAGNOSTIC FEEDBACK ---
+        st.subheader("📊 ROAS Performance Analysis")
+        
+        if actual_roas < target_roas_input or actual_roas < 2.0:
+            st.error(
+                f"🚨 **ROAS WARNING: Generated ROAS ({actual_roas:.2f}x) is BELOW your Target ROAS ({target_roas_input:.2f}x)!**\n\n"
+                f"Your campaign is currently returning **${actual_roas:.2f}** for every **$1.00 spent**, which is underperforming your desired profitability benchmark."
+            )
+            st.markdown(
+                """
+                ### 🛠️ How to Improve Your ROAS Number:
+                1. **Tighten Keyword Match Types & Add Negatives:** Switch broad match terms to **Phrase Match** or **Exact Match**, and expand your negative keyword list to eliminate non-converting clicks that waste ad budget.
+                2. **Optimize Landing Page Conversion Rate & Ad Quality:** Improve landing page load speed and offer clarity to raise your conversion rate from 3.2% to 4.5%+, or rewrite ad copy with stronger Call-to-Actions (CTAs) to boost Quality Score and lower your average CPC.
+                """
+            )
+        else:
+            st.success(
+                f"🎉 **EXCELLENT PERFORMANCE: Generated ROAS ({actual_roas:.2f}x) MEETS or EXCEEDS your Target ROAS ({target_roas_input:.2f}x)!**\n\n"
+                f"Your campaign is generating **${actual_roas:.2f} in revenue for every $1.00 spent**, creating a highly profitable return on investment."
+            )
+            st.markdown(
+                """
+                ### 🚀 Next Steps to Scale Performance:
+                1. **Increase Daily Budget:** Reinvest profits into high-converting exact match keywords.
+                2. **Expand Ad Assets:** Add additional sitelinks and visual callouts to capture more SERP real estate.
+                """
+            )
+
+        # Simulated Daily Trend Line
+        st.subheader("📈 30-Day GA4 Traffic Trend")
         days = np.arange(1, 31)
         daily_sessions = np.random.normal(est_clicks / 30, 4, 30).astype(int)
         chart_df = pd.DataFrame({"Day": days, "GA4 Paid Search Traffic": daily_sessions})
         st.line_chart(chart_df.set_index("Day"))
         
+        # GA4 Channel Comparison Table
         st.subheader("📊 GA4 Default Channel Grouping Comparison Table")
-        st.caption("How Paid Search performs alongside Organic Search, Direct, and Organic Social in GA4:")
-        
         channel_df = pd.DataFrame({
             "Default Channel Grouping": ["Paid Search (Google Ads)", "Organic Search (Google)", "Direct", "Organic Social (TikTok/IG)"],
             "Sessions": [int(est_clicks), int(est_clicks * 1.5), int(est_clicks * 0.7), int(est_clicks * 1.2)],
             "Engagement Rate %": ["68.5%", "73.2%", "52.0%", "59.4%"],
             "Conversions": [conversions, int(conversions * 1.4), int(conversions * 0.6), int(conversions * 0.8)],
-            "Conversion Rate %": ["3.4%", "3.2%", "2.5%", "2.1%"]
+            "Conversion Rate %": ["3.2%", "3.6%", "2.5%", "2.1%"]
         })
         st.table(channel_df)
-        
-        # Diagnostic Feedback Narrative
-        st.info(
-            f"💡 **GA4 Diagnostic Analysis for {brand}:**\n"
-            f"* **Paid Search Conversion Rate (3.4%)** outperforms Organic Social (2.1%) because paid search targets buyers in the **Decision Stage** who are actively searching for solutions.\n"
-            f"* **Attribution Insight:** Paid Search generated **{conversions} direct conversions** while driving secondary brand awareness. UTM campaign tag (`{utm_campaign}`) successfully captured all attribution data in GA4."
-        )
