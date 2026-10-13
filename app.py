@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import base64
 
-# Define function alias via getattr to prevent automated URL scrubbing of .radio TLDs
+# Define function alias via getattr to prevent automated URL scrubbing
 st_radio = getattr(st, "radio")
 
 st.set_page_config(page_title="Paid Search Campaign Simulator", page_icon="📊", layout="wide")
@@ -44,17 +44,17 @@ target_roas_input = st.sidebar.number_input(
     step=0.5
 )
 
-daily_budget = st.sidebar.number_input(
+daily_budget = st.sidebar.slider(
     "Daily Budget ($):",
     min_value=10,
-    max_value=1000,
-    value=160,
-    step=10
+    max_value=500,
+    value=164,
+    step=2
 )
 monthly_budget = daily_budget * 30.4
 
 st.sidebar.subheader("🔗 GA4 Tracking & Attribution")
-utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value="fall2026_paid_search_campaign")
+utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value="fall2026_aura_search_campaign")
 auto_tagging = st.sidebar.checkbox("Enable Google Auto-Tagging (GCLID for GA4)", value=True)
 
 # --- TAB NAVIGATION ---
@@ -69,68 +69,62 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 # --- MODULE 1: CUSTOM KEYWORD PLANNER ---
 with tab1:
     st.header("Module 1: Custom Keyword Research")
-    st.write("Build your keyword list by entering **5 search terms** and selecting their **Intent Stage**. To achieve a high ROAS, balance your keywords across intent stages while keeping your **Blended CPC < $2.00** and **Average Keyword Difficulty < 40%**.")
+    st.write("Type **5 search terms** your target buyers would search for. The system will automatically detect the **Intent Stage** and calculate search volume, keyword difficulty, and estimated CPC. To achieve a high ROAS, balance your keywords across intent stages while keeping **Blended CPC < $2.00** and **Average KD < 40%**.")
     
-    st.subheader("Configure Your 5 Target Keywords")
-    
-    intent_options = [
-        "Navigational / Brand",
-        "Consideration / Comparison",
-        "Awareness / Problem",
-        "Decision / Commercial"
-    ]
-    
-    col_input, col_table = st.columns([1.2, 1.8])
+    col_input, col_table = st.columns([1.1, 1.9])
     
     with col_input:
-        st.markdown("**Enter Keywords & Select Intent:**")
-        
+        st.subheader("Type 5 Target Search Terms")
         kw1 = st.text_input("Keyword 1:", value="aura sleep headband online", key="kw1_text")
-        intent1 = st.selectbox("Intent 1:", intent_options, index=0, key="intent1_sel")
-        
         kw2 = st.text_input("Keyword 2:", value="best bluetooth headband for sleeping", key="kw2_text")
-        intent2 = st.selectbox("Intent 2:", intent_options, index=1, key="intent2_sel")
-        
         kw3 = st.text_input("Keyword 3:", value="how to block noise while sleeping", key="kw3_text")
-        intent3 = st.selectbox("Intent 3:", intent_options, index=2, key="intent3_sel")
-        
         kw4 = st.text_input("Keyword 4:", value="buy noise canceling sleep headband", key="kw4_text")
-        intent4 = st.selectbox("Intent 4:", intent_options, index=3, key="intent4_sel")
-        
         kw5 = st.text_input("Keyword 5:", value="affordable insomnia relief headband nyc", key="kw5_text")
-        intent5 = st.selectbox("Intent 5:", intent_options, index=2, key="intent5_sel")
 
-    def get_keyword_metrics(kw, intent):
-        if intent == "Navigational / Brand":
+    # Automated Intent Detection & Metrics Logic
+    def auto_detect_intent_and_metrics(kw):
+        kw_lower = kw.lower().strip()
+        if any(term in kw_lower for term in ["aura", "brand", "official", "auraband"]):
+            intent = "Navigational / Brand"
             cpc = 0.95
             kd = 22
             msv = 1800
-        elif intent == "Consideration / Comparison":
+        elif any(term in kw_lower for term in ["vs", "best", "top", "review", "comparison", "bluetooth"]):
+            intent = "Consideration / Comparison"
             cpc = 1.85
             kd = 38
             msv = 4200
-        elif intent == "Awareness / Problem":
+        elif any(term in kw_lower for term in ["how", "why", "what", "noise", "insomnia", "relief", "help", "block"]):
+            intent = "Awareness / Problem"
             cpc = 1.35
             kd = 32
             msv = 7500
         else: # Decision / Commercial
+            intent = "Decision / Commercial"
             cpc = 3.25
             kd = 65
             msv = 3100
-        return {"Target Keyword": kw, "Intent Stage": intent, "Est. CPC ($)": cpc, "Keyword Difficulty (%)": kd, "Monthly Search Vol (MSV)": msv}
+            
+        return {
+            "Target Keyword": kw, 
+            "Intent Stage": intent, 
+            "Est. CPC ($)": cpc, 
+            "Keyword Difficulty (%)": kd, 
+            "Monthly Search Vol (MSV)": msv
+        }
 
     kw_list_data = [
-        get_keyword_metrics(kw1, intent1),
-        get_keyword_metrics(kw2, intent2),
-        get_keyword_metrics(kw3, intent3),
-        get_keyword_metrics(kw4, intent4),
-        get_keyword_metrics(kw5, intent5)
+        auto_detect_intent_and_metrics(kw1),
+        auto_detect_intent_and_metrics(kw2),
+        auto_detect_intent_and_metrics(kw3),
+        auto_detect_intent_and_metrics(kw4),
+        auto_detect_intent_and_metrics(kw5)
     ]
     
     df_kws = pd.DataFrame(kw_list_data)
     
     with col_table:
-        st.markdown("**💡 Keyword Research Summary Table:**")
+        st.subheader("💡 Automated Keyword Research Results")
         st.dataframe(df_kws, use_container_width=True, hide_index=True)
         
         selected_intents = set(df_kws["Intent Stage"].tolist())
@@ -146,13 +140,6 @@ with tab1:
         has_nav = "Navigational / Brand" in selected_intents
         has_comp = "Consideration / Comparison" in selected_intents
         has_prob = "Awareness / Problem" in selected_intents
-        
-        st.markdown("---")
-        st.markdown("**🎯 Intent Diversity Checklist:**")
-        c_i1, c_i2, c_i3 = st.columns(3)
-        c_i1.markdown("✅ **Navigational / Brand**" if has_nav else "❌ Missing Navigational / Brand")
-        c_i2.markdown("✅ **Consideration / Comparison**" if has_comp else "❌ Missing Consideration / Comparison")
-        c_i3.markdown("✅ **Awareness / Problem**" if has_prob else "❌ Missing Awareness / Problem")
 
 # --- MODULE 2: MATCH TYPES & NEGATIVE KEYWORDS ---
 with tab2:
@@ -182,7 +169,7 @@ with tab2:
     st.subheader("⚡ Real-Time Search Query Simulator")
     test_queries = [
         "free diy sleep headband pattern",
-        kw1 if kw1 else "aura sleep headband",
+        kw1 if kw1 else "aura sleep headband online",
         "jobs and career opportunities at aura",
         kw2 if kw2 else "best bluetooth headband for sleeping"
     ]
@@ -214,7 +201,7 @@ with tab3:
     st.write("Calculated using Class 5 Formulas: \\(\\text{CTR} = \\frac{\\text{Clicks}}{\\text{Impressions}}\\) | \\(\\text{Spend} = \\text{Clicks} \\times \\text{CPC}\\)")
     
     p1, p2, p3, p4 = st.columns(4)
-    p1.metric("Daily / Monthly Budget", f"${daily_budget:.0f}/day (${monthly_budget:,.2f}/mo)")
+    p1.metric("Monthly Budget / Projected Spend", f"${monthly_budget:,.2f}")
     p2.metric("Projected Impressions", f"{int(est_impressions):,}")
     p3.metric("Projected Clicks (Sessions)", f"{int(est_clicks):,}")
     p4.metric("Benchmark CTR %", f"{ctr_benchmark*100:.1f}%")
@@ -234,7 +221,7 @@ with tab4:
         
         d1 = st.text_area("Description 1 (Max 90 chars):", value="Ultra-thin Bluetooth speakers designed for side sleepers. Fall asleep naturally tonight.")
         d2 = st.text_area("Description 2 (Max 90 chars):", value="Free 2-day shipping in NY/NJ. Read 500+ 5-star customer reviews on our official site.")
-        display_url = st.text_input("Display URL:", value="[suspicious link removed]")
+        display_url = st.text_input("Display URL:", value="www.auraband.com")
 
     with col_assets:
         st.subheader("2. Ad Assets & Image Upload")
@@ -254,15 +241,15 @@ with tab4:
     with col_preview:
         st.subheader("3. Live Search Preview")
         
-        # Prepare image HTML to render to the RIGHT of headlines if uploaded
-        image_html = ""
+        # Prepare image HTML to render ABOVE blue headlines if uploaded
+        image_html_top = ""
         if uploaded_image is not None:
             img_bytes = uploaded_image.getvalue()
             base64_img = base64.b64encode(img_bytes).decode('utf-8')
             mime_type = uploaded_image.type if uploaded_image.type else "image/png"
-            image_html = f'''
-            <div style="width: 85px; height: 85px; flex-shrink: 0; margin-left: 12px;">
-                <img src="data:{mime_type};base64,{base64_img}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px; border: 1px solid #dadce0;" />
+            image_html_top = f'''
+            <div style="width: 100%; max-height: 140px; overflow: hidden; border-radius: 6px; margin-bottom: 10px;">
+                <img src="data:{mime_type};base64,{base64_img}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #dadce0;" />
             </div>
             '''
         
@@ -272,16 +259,12 @@ with tab4:
         st.markdown(
             f"""
             <div style="border: 1px solid #dadce0; border-radius: 8px; padding: 16px; background-color: #ffffff; font-family: Arial, sans-serif;">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                    <div style="flex: 1;">
-                        <div style="font-size: 12px; color: #202124;">
-                            <span style="font-weight: bold;">Sponsored</span> • <span>{display_url}</span>
-                        </div>
-                        <h3 style="color: #1a0dab; margin: 4px 0px; font-size: 17px; line-height: 1.3;">{h1} | {h2} | {h3}</h3>
-                        <div style="color: #4d5156; font-size: 13px; margin-bottom: 6px;">{d1} {d2}</div>
-                    </div>
-                    {image_html}
+                {image_html_top}
+                <div style="font-size: 12px; color: #202124;">
+                    <span style="font-weight: bold;">Sponsored</span> • <span>{display_url}</span>
                 </div>
+                <h3 style="color: #1a0dab; margin: 4px 0px; font-size: 17px; line-height: 1.3;">{h1} | {h2} | {h3}</h3>
+                <div style="color: #4d5156; font-size: 13px; margin-bottom: 6px;">{d1} {d2}</div>
                 {"<div style='color: #006621; font-size: 12px; margin-bottom: 4px;'>" + callout_text + "</div>" if inc_callout else ""}
                 {"<div style='color: #1a0dab; font-size: 12px; margin-bottom: 4px;'>" + sitelink_html + "</div>" if inc_sitelinks else ""}
                 {"<div style='color: #5f6368; font-size: 12px;'>" + phone_html + "</div>" if inc_call else ""}
@@ -376,7 +359,7 @@ with tab5:
             
             st.markdown("### 🛠️ Required Adjustments to Reach 3.0 ROAS:")
             if not cond_intents:
-                st.write("❌ **Keyword Intent Diversity:** Ensure you select at least one *Navigational / Brand*, one *Consideration / Comparison*, and one *Awareness / Problem* keyword in Module 1.")
+                st.write("❌ **Keyword Intent Diversity:** Ensure your 5 keywords cover at least one *Navigational / Brand*, one *Consideration / Comparison*, and one *Awareness / Problem* search query.")
             if not cond_cpc:
                 st.write(f"❌ **Blended CPC Too High:** Your blended CPC is **${blended_cpc:.2f}**. Adjust your keywords so blended CPC is **under $2.00**.")
             if not cond_kd:
