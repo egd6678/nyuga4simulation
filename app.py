@@ -75,8 +75,8 @@ with tab1:
     with col_input:
         st.subheader("Type 3 Target Search Terms")
         kw1 = st.text_input("Keyword 1:", value="official brand name online", key="kw1_text")
-        kw2 = st.text_input("Keyword 2:", value="best product category comparison", key="kw2_text")
-        kw3 = st.text_input("Keyword 3:", value="how to solve customer problem", key="kw3_text")
+        kw2 = st.text_input("Keyword 2:", value="best product reviews online", key="kw2_text")
+        kw3 = st.text_input("Keyword 3:", value="how to choose the right product", key="kw3_text")
 
     # Automated Intent Detection & Metrics Logic
     def auto_detect_intent_and_metrics(kw):
@@ -86,12 +86,12 @@ with tab1:
             cpc = 0.95
             kd = 22
             msv = 1800
-        elif any(term in kw_lower for term in ["vs", "best", "top", "review", "comparison", "bluetooth", "category"]):
+        elif any(term in kw_lower for term in ["vs", "best", "top", "review", "reviews", "comparison", "bluetooth", "category", "product"]):
             intent = "Consideration / Comparison"
             cpc = 1.85
             kd = 38
             msv = 4200
-        elif any(term in kw_lower for term in ["how", "why", "what", "noise", "insomnia", "relief", "help", "block", "problem", "solve"]):
+        elif any(term in kw_lower for term in ["how", "why", "what", "noise", "insomnia", "relief", "help", "block", "problem", "solve", "choose"]):
             intent = "Awareness / Problem"
             cpc = 1.35
             kd = 32
@@ -166,7 +166,7 @@ with tab2:
         "free diy download guide",
         kw1 if kw1 else "official brand name online",
         "jobs and career opportunities",
-        kw2 if kw2 else "best product category comparison"
+        kw2 if kw2 else "best product reviews online"
     ]
     
     sim_results = []
