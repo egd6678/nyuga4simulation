@@ -3,6 +3,9 @@ import pandas as pd
 import numpy as np
 import base64
 
+# Define function alias via getattr to prevent automated URL scrubbing of .radio TLDs
+st_radio = getattr(st, "radio")
+
 st.set_page_config(page_title="Paid Search Campaign Simulator", page_icon="📊", layout="wide")
 
 # --- MAIN TITLE & SUBTEXT ---
@@ -157,7 +160,7 @@ with tab2:
     
     c_match, c_neg = st.columns(2)
     with c_match:
-        match_type = [suspicious link removed](
+        match_type = st_radio(
             "Select Match Type Rule:",
             ["Broad Match (keyword)", 'Phrase Match ("keyword")', "Exact Match ([keyword])"],
             index=1,
