@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import base64
 
 # Define function alias via getattr to prevent automated URL scrubbing
 st_radio = getattr(st, "radio")
@@ -69,17 +68,15 @@ tab1, tab2, tab3, tab4, tab5 = st.tabs([
 # --- MODULE 1: CUSTOM KEYWORD PLANNER ---
 with tab1:
     st.header("Module 1: Custom Keyword Research")
-    st.write("Type **5 search terms** your target buyers would search for. The system will automatically detect the **Intent Stage** and calculate search volume, keyword difficulty, and estimated CPC. To achieve a high ROAS, balance your keywords across intent stages while keeping **Blended CPC < $2.00** and **Average KD < 40%**.")
+    st.write("Type **3 search terms** your target buyers would search for. The system will automatically detect the **Intent Stage** and calculate search volume, keyword difficulty, and estimated CPC. To achieve a high ROAS, balance your keywords across intent stages while keeping **Blended CPC < $2.00** and **Average KD < 40%**.")
     
     col_input, col_table = st.columns([1.1, 1.9])
     
     with col_input:
-        st.subheader("Type 5 Target Search Terms")
+        st.subheader("Type 3 Target Search Terms")
         kw1 = st.text_input("Keyword 1:", value="aura sleep headband online", key="kw1_text")
         kw2 = st.text_input("Keyword 2:", value="best bluetooth headband for sleeping", key="kw2_text")
         kw3 = st.text_input("Keyword 3:", value="how to block noise while sleeping", key="kw3_text")
-        kw4 = st.text_input("Keyword 4:", value="buy noise canceling sleep headband", key="kw4_text")
-        kw5 = st.text_input("Keyword 5:", value="affordable insomnia relief headband nyc", key="kw5_text")
 
     # Automated Intent Detection & Metrics Logic
     def auto_detect_intent_and_metrics(kw):
@@ -116,9 +113,7 @@ with tab1:
     kw_list_data = [
         auto_detect_intent_and_metrics(kw1),
         auto_detect_intent_and_metrics(kw2),
-        auto_detect_intent_and_metrics(kw3),
-        auto_detect_intent_and_metrics(kw4),
-        auto_detect_intent_and_metrics(kw5)
+        auto_detect_intent_and_metrics(kw3)
     ]
     
     df_kws = pd.DataFrame(kw_list_data)
@@ -209,7 +204,7 @@ with tab3:
 # --- MODULE 4: AD BUILDER & AD ASSETS ---
 with tab4:
     st.header("Module 4: Responsive Search Ad & Ad Assets Builder")
-    st.write("Build your ad copy and include **Ad Assets (Sitelinks, Callouts, Image Upload)** to maximize SERP real estate, Quality Score, and CTR.")
+    st.write("Build your ad copy and include **Ad Assets (Sitelinks, Callouts)** to maximize SERP real estate, Quality Score, and CTR.")
     
     col_copy, col_assets, col_preview = st.columns([1.1, 1.1, 1.4])
     
@@ -221,14 +216,10 @@ with tab4:
         
         d1 = st.text_area("Description 1 (Max 90 chars):", value="Ultra-thin Bluetooth speakers designed for side sleepers. Fall asleep naturally tonight.")
         d2 = st.text_area("Description 2 (Max 90 chars):", value="Free 2-day shipping in NY/NJ. Read 500+ 5-star customer reviews on our official site.")
-        display_url = st.text_input("Display URL:", value="www.auraband.com")
+        display_url = st.text_input("Display URL:", value="[suspicious link removed]")
 
     with col_assets:
-        st.subheader("2. Ad Assets & Image Upload")
-        uploaded_image = st.file_uploader("Upload Ad Image Asset (PNG / JPG):", type=["png", "jpg", "jpeg"])
-        if uploaded_image is not None:
-            st.image(uploaded_image, caption="Uploaded Asset Preview", width=140)
-            
+        st.subheader("2. Ad Assets")
         inc_sitelinks = st.checkbox("Include Sitelink Assets", value=True)
         sitelink_text = st.text_input("Sitelink Text:", value="View Sleep Guides & Pricing") if inc_sitelinks else ""
         
@@ -241,25 +232,12 @@ with tab4:
     with col_preview:
         st.subheader("3. Live Search Preview")
         
-        # Prepare image HTML to render ABOVE blue headlines if uploaded
-        image_html_top = ""
-        if uploaded_image is not None:
-            img_bytes = uploaded_image.getvalue()
-            base64_img = base64.b64encode(img_bytes).decode('utf-8')
-            mime_type = uploaded_image.type if uploaded_image.type else "image/png"
-            image_html_top = f'''
-            <div style="width: 100%; max-height: 140px; overflow: hidden; border-radius: 6px; margin-bottom: 10px;">
-                <img src="data:{mime_type};base64,{base64_img}" style="width: 100%; height: 140px; object-fit: cover; border-radius: 6px; border: 1px solid #dadce0;" />
-            </div>
-            '''
-        
         phone_html = f"📞 Call {phone_num}" if inc_call else ""
         sitelink_html = f"<u>{sitelink_text}</u> • <u>Customer Reviews</u> • <u>FAQs</u>" if inc_sitelinks else ""
         
         st.markdown(
             f"""
             <div style="border: 1px solid #dadce0; border-radius: 8px; padding: 16px; background-color: #ffffff; font-family: Arial, sans-serif;">
-                {image_html_top}
                 <div style="font-size: 12px; color: #202124;">
                     <span style="font-weight: bold;">Sponsored</span> • <span>{display_url}</span>
                 </div>
@@ -359,7 +337,7 @@ with tab5:
             
             st.markdown("### 🛠️ Required Adjustments to Reach 3.0 ROAS:")
             if not cond_intents:
-                st.write("❌ **Keyword Intent Diversity:** Ensure your 5 keywords cover at least one *Navigational / Brand*, one *Consideration / Comparison*, and one *Awareness / Problem* search query.")
+                st.write("❌ **Keyword Intent Diversity:** Ensure your 3 keywords cover at least one *Navigational / Brand*, one *Consideration / Comparison*, and one *Awareness / Problem* search query.")
             if not cond_cpc:
                 st.write(f"❌ **Blended CPC Too High:** Your blended CPC is **${blended_cpc:.2f}**. Adjust your keywords so blended CPC is **under $2.00**.")
             if not cond_kd:
