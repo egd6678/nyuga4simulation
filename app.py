@@ -53,7 +53,7 @@ daily_budget = st.sidebar.slider(
 monthly_budget = daily_budget * 30.4
 
 st.sidebar.subheader("🔗 GA4 Tracking & Attribution")
-utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value="fall2026_aura_search_campaign")
+utm_campaign = st.sidebar.text_input("GA4 UTM Campaign Tag:", value="fall2026_paid_search_campaign")
 auto_tagging = st.sidebar.checkbox("Enable Google Auto-Tagging (GCLID for GA4)", value=True)
 
 # --- TAB NAVIGATION ---
@@ -74,24 +74,24 @@ with tab1:
     
     with col_input:
         st.subheader("Type 3 Target Search Terms")
-        kw1 = st.text_input("Keyword 1:", value="aura sleep headband online", key="kw1_text")
-        kw2 = st.text_input("Keyword 2:", value="best bluetooth headband for sleeping", key="kw2_text")
-        kw3 = st.text_input("Keyword 3:", value="how to block noise while sleeping", key="kw3_text")
+        kw1 = st.text_input("Keyword 1:", value="official brand name online", key="kw1_text")
+        kw2 = st.text_input("Keyword 2:", value="best product category comparison", key="kw2_text")
+        kw3 = st.text_input("Keyword 3:", value="how to solve customer problem", key="kw3_text")
 
     # Automated Intent Detection & Metrics Logic
     def auto_detect_intent_and_metrics(kw):
         kw_lower = kw.lower().strip()
-        if any(term in kw_lower for term in ["aura", "brand", "official", "auraband"]):
+        if any(term in kw_lower for term in ["aura", "brand", "official", "auraband", "company", "name"]):
             intent = "Navigational / Brand"
             cpc = 0.95
             kd = 22
             msv = 1800
-        elif any(term in kw_lower for term in ["vs", "best", "top", "review", "comparison", "bluetooth"]):
+        elif any(term in kw_lower for term in ["vs", "best", "top", "review", "comparison", "bluetooth", "category"]):
             intent = "Consideration / Comparison"
             cpc = 1.85
             kd = 38
             msv = 4200
-        elif any(term in kw_lower for term in ["how", "why", "what", "noise", "insomnia", "relief", "help", "block"]):
+        elif any(term in kw_lower for term in ["how", "why", "what", "noise", "insomnia", "relief", "help", "block", "problem", "solve"]):
             intent = "Awareness / Problem"
             cpc = 1.35
             kd = 32
@@ -151,7 +151,7 @@ with tab2:
     with c_neg:
         negatives = st.text_input(
             "Negative Keywords (enter at least 4 words separated by commas):", 
-            value="free, diy, jobs, cheap, pattern, repair"
+            value="free, jobs"
         )
         st.caption("Negative keywords prevent wasted ad spend on unqualified clicks.")
         
@@ -159,14 +159,14 @@ with tab2:
         if len(neg_words) >= 4:
             st.success(f"✅ Negative Keyword Shield Active ({len(neg_words)} terms added)")
         else:
-            st.warning(f"⚠️ Need at least 4 negative keywords (currently {len(neg_words)} added).")
+            st.warning(f"⚠️ Need at least 4 negative keywords (currently {len(neg_words)} added). Add more terms separated by commas!")
 
     st.subheader("⚡ Real-Time Search Query Simulator")
     test_queries = [
-        "free diy sleep headband pattern",
-        kw1 if kw1 else "aura sleep headband online",
-        "jobs and career opportunities at aura",
-        kw2 if kw2 else "best bluetooth headband for sleeping"
+        "free diy download guide",
+        kw1 if kw1 else "official brand name online",
+        "jobs and career opportunities",
+        kw2 if kw2 else "best product category comparison"
     ]
     
     sim_results = []
@@ -210,21 +210,21 @@ with tab4:
     
     with col_copy:
         st.subheader("1. Main Ad Copy")
-        h1 = st.text_input("Headline 1 (Max 30 chars):", value="Official Aura Sleep Headband")
-        h2 = st.text_input("Headline 2 (Max 30 chars):", value="Block Noise & Fall Asleep Fast")
-        h3 = st.text_input("Headline 3 (Max 30 chars):", value="Order Online Today - $85")
+        h1 = st.text_input("Headline 1 (Max 30 chars):", value="Official Brand Website")
+        h2 = st.text_input("Headline 2 (Max 30 chars):", value="Top Rated Solutions Online")
+        h3 = st.text_input("Headline 3 (Max 30 chars):", value="Order Online Today - Save 10%")
         
-        d1 = st.text_area("Description 1 (Max 90 chars):", value="Ultra-thin Bluetooth speakers designed for side sleepers. Fall asleep naturally tonight.")
-        d2 = st.text_area("Description 2 (Max 90 chars):", value="Free 2-day shipping in NY/NJ. Read 500+ 5-star customer reviews on our official site.")
+        d1 = st.text_area("Description 1 (Max 90 chars):", value="Discover premium products designed for quality and reliability. Shop our official site today.")
+        d2 = st.text_area("Description 2 (Max 90 chars):", value="Free 2-day shipping on local orders. Read 500+ 5-star verified customer reviews online.")
         display_url = st.text_input("Display URL:", value="[suspicious link removed]")
 
     with col_assets:
         st.subheader("2. Ad Assets")
         inc_sitelinks = st.checkbox("Include Sitelink Assets", value=True)
-        sitelink_text = st.text_input("Sitelink Text:", value="View Sleep Guides & Pricing") if inc_sitelinks else ""
+        sitelink_text = st.text_input("Sitelink Text:", value="View Pricing & Offerings") if inc_sitelinks else ""
         
         inc_callout = st.checkbox("Include Callout Assets", value=True)
-        callout_text = st.text_input("Callout Highlights:", value="Free 2-Day Shipping • 30-Night Trial") if inc_callout else ""
+        callout_text = st.text_input("Callout Highlights:", value="Free 2-Day Shipping • 30-Day Trial") if inc_callout else ""
         
         inc_call = st.checkbox("Include Phone Call Asset", value=True)
         phone_num = st.text_input("Phone Number:", value="(212) 555-0199") if inc_call else ""
